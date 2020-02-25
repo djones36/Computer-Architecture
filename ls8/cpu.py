@@ -18,7 +18,7 @@ class CPU:
         self.reg = [0] * 8
         # Internal Registers
         self.pc = 0  # counter
-        self.ir = '00000000'
+        self.ir = "00000000"
         # instruction set
         self.instruction = {}
         self.instruction[LDI] = self.handle_LDI
@@ -30,7 +30,7 @@ class CPU:
     def ram_write(self, address, value):
         self.ram[address] = value
 
-    def load(self):
+    def load(self, program):
         """Load a program into memory."""
 
         address = 0
@@ -90,4 +90,20 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+
+        running = True  # REPL  execution
+        while running:
+            # Start the CPU store instructions in IR
+            self.ir = self.ram_read(self.pc)
+            operand_a = self.ram_read(self.pc+1)
+            operand_b = self.ram_read(self.pc+2)
+
+            if self.ir == HLT:
+                running = False
+                break
+            # excecute instructions
+            try:
+                self.instruction[self.ir](operand_a, operand_b)
+            except:
+                print(f"Error: Unknown Command {self.ir}")
+                sys.exit(1)
