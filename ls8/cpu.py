@@ -6,6 +6,9 @@ import sys
 LDI = 0b10000010
 PRN = 0b01000111
 HLT = 0b00000001
+MUL = 0b10100010
+# R7 Stack Pointer
+SP = 7
 
 
 class CPU:
@@ -23,6 +26,7 @@ class CPU:
         self.instruction = {}
         self.instruction[LDI] = self.handle_LDI
         self.instruction[PRN] = self.handle_PRN
+        self.instruction[MUL] = self.handle_MUL
 
     def ram_read(self, address):
         return self.ram[address]
@@ -37,15 +41,15 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010,  # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111,  # PRN R0
+        #     0b00000000,
+        #     0b00000001,  # HLT
+        # ]
 
         for instruction in program:
             self.ram[address] = instruction
@@ -57,6 +61,8 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         # elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -88,10 +94,16 @@ class CPU:
         print(f"Print to Console - {self.reg[operand_a]}")
         self.pc += 2
 
+    def handle_MUL(self, operand_a, operand_b):
+        self.alu("MUL", operand_a, operand_b)
+        self.pc += 3
+
     def run(self):
         """Run the CPU."""
 
         running = True  # REPL  execution
+
+        self.reg[SP] = 0xF4
         while running:
             # Start the CPU store instructions in IR
             self.ir = self.ram_read(self.pc)
