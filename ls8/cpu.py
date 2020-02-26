@@ -36,24 +36,21 @@ class CPU:
 
     def load(self, program):
         """Load a program into memory."""
+        try:
+            address = 0
 
-        address = 0
+            with open(program) as f:
+                for line in f:
+                    comment_split = line.split('#')
+                    num = comment_split[0].strip()
+                    if num == "":
+                        continue
+                    value = int(num, 2)
+                    self.ram_write(address, value)
+                    address += 1
 
-        # For now, we've just hardcoded a program:
-
-        # program = [
-        #     # From print8.ls8
-        #     0b10000010,  # LDI R0,8
-        #     0b00000000,
-        #     0b00001000,
-        #     0b01000111,  # PRN R0
-        #     0b00000000,
-        #     0b00000001,  # HLT
-        # ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        except FileNotFoundError:
+            print(f"{sys.arg[0]}: {sys.arg[1]} not found")
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
